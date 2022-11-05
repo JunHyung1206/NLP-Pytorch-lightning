@@ -196,4 +196,7 @@ output.csv
 README.md
 
 Savemodels/
+
 *.yaml
+
+requirements.txt
