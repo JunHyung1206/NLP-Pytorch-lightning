@@ -1,17 +1,14 @@
-import argparse
-
-import pandas as pd
-
 from tqdm.auto import tqdm
 
 import transformers
 import torch
 import torchmetrics
 import pytorch_lightning as pl
-from . import loss as Loss
+import Utils.utils as utils
+
 
 class Model(pl.LightningModule):
-    def __init__(self, conf):
+    def __init__(self, conf, new_vocab_size):
         super().__init__()
         self.save_hyperparameters()
 
@@ -19,13 +16,13 @@ class Model(pl.LightningModule):
         self.lr = conf.train.lr
 
         # 사용할 모델을 호출합니다.
-        self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(
-            pretrained_model_name_or_path=self.model_name, num_labels=1)
-        # Loss 계산을 위해 사용될 L1Loss를 호출합니다.
-        self.loss_func = Loss.loss_config[conf.train.loss]
+        self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
+
+        self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
+        self.loss_func = utils.loss_dict[conf.train.loss]
 
     def forward(self, x):
-        x = self.plm(x)['logits']
+        x = self.plm(x)["logits"]
 
         return x
 
@@ -54,7 +51,7 @@ class Model(pl.LightningModule):
         self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
 
     def predict_step(self, batch, batch_idx):
-        x = batch
+        x, y = batch
         logits = self(x)
 
         return logits.squeeze()
