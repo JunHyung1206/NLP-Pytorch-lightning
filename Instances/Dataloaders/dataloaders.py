@@ -33,48 +33,38 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
     def tokenizing(self, dataframe):
         data = []
         for idx, item in tqdm(dataframe.iterrows(), desc='tokenizing', total=len(dataframe)):
-            # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
-            text = '[SEP]'.join([item[text_column] for text_column in self.text_columns])
+            text = '[SEP]'.join([item[text_column] for text_column in self.text_columns]) # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
             outputs = self.tokenizer(text, add_special_tokens=True, padding='max_length', truncation=True)
             data.append(outputs['input_ids'])
         return data
 
-    def preprocessing(self, data):
-        # 안쓰는 컬럼을 삭제합니다.
-        data = data.drop(columns=self.delete_columns)
-
-        # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
+    def preprocessing(self, data):       
+        data = data.drop(columns=self.delete_columns) # 안쓰는 컬럼을 삭제합니다.       
         try:
-            targets = data[self.target_columns].values.tolist()
+            targets = data[self.target_columns].values.tolist() # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
         except:
-            targets = []
-        # 텍스트 데이터를 전처리합니다.
-        inputs = self.tokenizing(data)
-
+            targets = []     
+        inputs = self.tokenizing(data) # 텍스트 데이터를 전처리합니다.
         return inputs, targets
 
     def setup(self, stage='fit'):
         if stage == 'fit':
-            # 학습 데이터와 검증 데이터셋을 호출합니다
-            train_data = pd.read_csv(self.train_path)
+            
+            train_data = pd.read_csv(self.train_path) # 학습 데이터와 검증 데이터셋을 호출합니다
             val_data = pd.read_csv(self.dev_path)
 
-            # 학습데이터 준비
-            train_inputs, train_targets = self.preprocessing(train_data)
+            train_inputs, train_targets = self.preprocessing(train_data) # 학습데이터 준비
+            val_inputs, val_targets = self.preprocessing(val_data) # 검증데이터 준비
 
-            # 검증데이터 준비
-            val_inputs, val_targets = self.preprocessing(val_data)
-
-            # train 데이터만 shuffle을 적용해줍니다, 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
-            self.train_dataset = Dataset(train_inputs, train_targets)
-            self.val_dataset = Dataset(val_inputs, val_targets)
+           
+            self.train_dataset = Dataset(train_inputs, train_targets)  # train 데이터만 shuffle을 적용해줍니다
+            self.val_dataset = Dataset(val_inputs, val_targets) # 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
         else:
-            # 평가데이터 준비
-            test_data = pd.read_csv(self.test_path)
+            test_data = pd.read_csv(self.test_path) # 평가데이터 준비
             test_inputs, test_targets = self.preprocessing(test_data)
             self.test_dataset = Dataset(test_inputs, test_targets)
 
-            predict_data = pd.read_csv(self.predict_path)
+            predict_data = pd.read_csv(self.predict_path) # 예측할 데이터 준비
             predict_inputs, predict_targets = self.preprocessing(predict_data)
             self.predict_dataset = Dataset(predict_inputs, [])
 
@@ -91,9 +81,9 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size)
     
     
+
     
-    
-class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 버전 (train/value비율 설정) # 층화 추출 이용
+class Dataloader_Ver2(pl.LightningDataModule):  # train, dev, test, predict 따로 있는 버전
     def __init__(self, conf):
         super().__init__()
         self.model_name = conf.model.model_name
@@ -101,6 +91,7 @@ class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 �
         self.shuffle = conf.data.shuffle
 
         self.train_path = conf.path.train_path
+        self.dev_path = conf.path.dev_path
         self.test_path = conf.path.test_path
         self.predict_path = conf.path.test_path
 
@@ -111,7 +102,6 @@ class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 �
 
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
         self.tokenizer.model_max_length = 128
-        
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
@@ -119,50 +109,40 @@ class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 �
     def tokenizing(self, dataframe):
         data = []
         for idx, item in tqdm(dataframe.iterrows(), desc='tokenizing', total=len(dataframe)):
-            # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
-            text = '[SEP]'.join([item[text_column] for text_column in self.text_columns])
+            text = '[SEP]'.join([item[text_column] for text_column in self.text_columns]) # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
             outputs = self.tokenizer(text, add_special_tokens=True, padding='max_length', truncation=True)
             data.append(outputs['input_ids'])
         return data
 
-    def preprocessing(self, data):
-        # 안쓰는 컬럼을 삭제합니다.
-        data = data.drop(columns=self.delete_columns)
-
-        # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
+    def preprocessing(self, data):       
+        data = data.drop(columns=self.delete_columns) # 안쓰는 컬럼을 삭제합니다.       
         try:
-            targets = data[self.target_columns].values.tolist()
+            targets = data[self.target_columns].values.tolist() # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
         except:
-            targets = []
-        # 텍스트 데이터를 전처리합니다.
-        inputs = self.tokenizing(data)
-
+            targets = []     
+        inputs = self.tokenizing(data) # 텍스트 데이터를 전처리합니다.
         return inputs, targets
 
     def setup(self, stage='fit'):
         if stage == 'fit':
-            # 학습 데이터와 검증 데이터셋을 호출합니다
-            train_data = pd.read_csv(self.train_path)
+            
+            train_data = pd.read_csv(self.train_path) # 학습 데이터와 검증 데이터셋을 호출합니다
             val_data = pd.read_csv(self.dev_path)
 
-            # 학습데이터 준비
-            train_inputs, train_targets = self.preprocessing(train_data)
+            train_inputs, train_targets = self.preprocessing(train_data) # 학습데이터 준비
+            val_inputs, val_targets = self.preprocessing(val_data) # 검증데이터 준비
 
-            # 검증데이터 준비
-            val_inputs, val_targets = self.preprocessing(val_data)
-
-            # train 데이터만 shuffle을 적용해줍니다, 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
-            self.train_dataset = ds.Dataset(train_inputs, train_targets)
-            self.val_dataset = ds.Dataset(val_inputs, val_targets)
+           
+            self.train_dataset = Dataset(train_inputs, train_targets)  # train 데이터만 shuffle을 적용해줍니다
+            self.val_dataset = Dataset(val_inputs, val_targets) # 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
         else:
-            # 평가데이터 준비
-            test_data = pd.read_csv(self.test_path)
+            test_data = pd.read_csv(self.test_path) # 평가데이터 준비
             test_inputs, test_targets = self.preprocessing(test_data)
-            self.test_dataset = ds.Dataset(test_inputs, test_targets)
+            self.test_dataset = Dataset(test_inputs, test_targets)
 
-            predict_data = pd.read_csv(self.predict_path)
+            predict_data = pd.read_csv(self.predict_path) # 예측할 데이터 준비
             predict_inputs, predict_targets = self.preprocessing(predict_data)
-            self.predict_dataset = ds.Dataset(predict_inputs, [])
+            self.predict_dataset = Dataset(predict_inputs, [])
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
@@ -175,5 +155,3 @@ class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 �
 
     def predict_dataloader(self):
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size)
-    
-    
