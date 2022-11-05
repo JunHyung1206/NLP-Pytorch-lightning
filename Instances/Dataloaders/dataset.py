@@ -1,16 +1,11 @@
-import argparse
-
 import pandas as pd
-
 from tqdm.auto import tqdm
 
-import transformers
 import torch
-import torchmetrics
 import pytorch_lightning as pl
 
 
-class Dataset(torch.utils.data.Dataset):
+class Dataset(torch.utils.dasta.Dataset):
     def __init__(self, inputs, targets=[]):
         self.inputs = inputs
         self.targets = targets

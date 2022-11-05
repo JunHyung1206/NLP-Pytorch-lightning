@@ -17,13 +17,11 @@ class Model(pl.LightningModule):
 
         # 사용할 모델을 호출합니다.
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
-
         self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
         self.loss_func = utils.loss_dict[conf.train.loss]
 
     def forward(self, x):
         x = self.plm(x)["logits"]
-
         return x
 
     def training_step(self, batch, batch_idx):
