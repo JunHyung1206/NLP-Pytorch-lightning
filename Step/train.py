@@ -4,6 +4,8 @@ import pytorch_lightning as pl
 import Instances.instance as instance
 import wandb
 
+import Utils.utils as utils
+
 
 def train(args, conf):
 
@@ -13,13 +15,32 @@ def train(args, conf):
 
     save_path = f"{conf.path.save_path}{conf.model.model_name}_{wandb_logger.experiment.name}/"
 
-    trainer = pl.Trainer(gpus=1, max_epochs=conf.train.max_epoch, log_every_n_steps=1, logger=wandb_logger)
+    trainer = pl.Trainer(
+        gpus=1,
+        max_epochs=conf.train.max_epoch,
+        log_every_n_steps=1,
+        logger=wandb_logger,
+        callbacks=[
+            utils.early_stop(
+                monitor=utils.monitor_dict[conf.utils.early_stop_monitor]["monitor"],
+                mode=utils.monitor_dict[conf.utils.early_stop_monitor]["mode"],
+                patience=conf.utils.patience,
+            ),
+            utils.best_save(
+                save_path=save_path,
+                top_k=conf.utils.top_k,
+                monitor=utils.monitor_dict[conf.utils.best_save_monitor]["monitor"],
+                mode=utils.monitor_dict[conf.utils.best_save_monitor]["mode"],
+                filename="{epoch}-{val_pearson}",  # best 모델 저장시에 filename 설정
+            ),
+        ],
+    )
     trainer.fit(model=model, datamodule=dataloader)
     test_pearson = trainer.test(model=model, datamodule=dataloader)
     wandb.finish()
 
     test_pearson = test_pearson[0]["test_pearson"]
-    trainer.save_checkpoint(f"{save_path}Epoch_{conf.train.max_epoch}-TestPearson_{test_pearson}.ckpt")
+    trainer.save_checkpoint(f"{save_path}epoch={conf.train.max_epoch-1}-test_pearson={test_pearson}.ckpt")
 
 
 def k_fold_train(args, conf):
@@ -63,4 +84,4 @@ def continue_train(args, conf):
     wandb.finish()
 
     test_pearson = test_pearson[0]["test_pearson"]
-    trainer.save_checkpoint(f"{save_path}Epoch_{conf.train.max_epoch}-TestPearson_{test_pearson}.ckpt")
+    trainer.save_checkpoint(f"{save_path}epoch={conf.train.max_epoch-1}-test_pearson={test_pearson}.ckpt")
