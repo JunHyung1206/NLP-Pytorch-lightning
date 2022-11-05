@@ -48,7 +48,7 @@ if __name__ == "__main__":
         if args.saved_model is None:
             print("경로를 입력해주세요")
         else:
-            print("Continue")  # k-fold는 추가 학습 고려 X
+            train.continue_train(args, conf)
 
     elif args.mode == "sweep" or args.mode == "s":
         exp_count = int(input("실험할 횟수를 입력해주세요 "))
