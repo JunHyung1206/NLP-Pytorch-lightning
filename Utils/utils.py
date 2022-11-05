@@ -106,12 +106,7 @@ class CheckpointEveryNEpochs(pl.Callback):
             trainer.save_checkpoint(ckpt_path)
 
 
-loss_dict = {
-    "l1": loss.L1_loss,
-    "mse": loss.MSE_loss,
-    "bce": loss.BCEWithLogitsLoss,
-    "rmse": loss.RMSE_loss,
-}
+loss_dict = {"l1": loss.L1_loss, "mse": loss.MSE_loss, "bce": loss.BCEWithLogitsLoss, "rmse": loss.RMSE_loss, "huber": loss.HUBER_loss}
 
 
 monitor_dict = {

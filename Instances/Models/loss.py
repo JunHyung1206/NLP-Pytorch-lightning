@@ -20,3 +20,8 @@ def BCEWithLogitsLoss(output, target):
 def RMSE_loss(output, target):
     loss_func = nn.MSELoss()
     return torch.sqrt(loss_func(output, target))
+
+
+def HUBER_loss(output, target):
+    loss_func = nn.HuberLoss()
+    return loss_func(output, target)
