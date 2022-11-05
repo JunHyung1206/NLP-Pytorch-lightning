@@ -200,3 +200,6 @@ Savemodels/
 *.yaml
 
 requirements.txt
+
+
+*.csv
