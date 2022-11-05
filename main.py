@@ -9,11 +9,12 @@ from omegaconf import OmegaConf
 
 from Step import train, inference
 
+
 def init():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", "-m", required=True)
     parser.add_argument("--config", "-c", type=str, default="base_config")
-    
+
     parser.add_argument(
         "--saved_model",
         "-s",
@@ -34,11 +35,11 @@ def init():
 
 
 if __name__ == "__main__":
-    
+
     args, conf = init()
-    
+
     if args.mode == "train" or args.mode == "t":
-        if conf.k_fold.use_k_fold: # num_folds 변수 확인
+        if conf.k_fold.use_k_fold:  # num_folds 변수 확인
             print("K-Fold Train")
         else:
             train.train(args, conf)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
         if args.saved_model is None:
             print("경로를 입력해주세요")
         else:
-            print("Continue") # k-fold는 추가 학습 고려 X
+            print("Continue")  # k-fold는 추가 학습 고려 X
 
     elif args.mode == "exp" or args.mode == "e":
         exp_count = int(input("실험할 횟수를 입력해주세요 "))
@@ -57,7 +58,7 @@ if __name__ == "__main__":
         if args.saved_model is None:
             print("경로를 입력해주세요")
         else:
-            print("Inference")
+            inference.inference(args, conf)
     else:
         print("모드를 다시 설정해주세요 ")
         print("train     : t,\ttrain")
