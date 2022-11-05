@@ -7,7 +7,8 @@ import torch
 import torchmetrics
 import pytorch_lightning as pl
 
-class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따로 있는 버전
+# train, dev, test, predict 따로 있는 버전
+class Dataloader_Ver1(pl.LightningDataModule):  
     def __init__(self, conf):
         super().__init__()
         self.model_name = conf.model.model_name
@@ -82,8 +83,8 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
     
     
 
-    
-class Dataloader_Ver2(pl.LightningDataModule):  # train, dev, test, predict 따로 있는 버전
+# train, dev, test, predict 따로 있는 버전
+class Dataloader_Ver2(pl.LightningDataModule):  
     def __init__(self, conf):
         super().__init__()
         self.model_name = conf.model.model_name
