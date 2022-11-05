@@ -90,12 +90,13 @@ class Dataloader_Ver1(pl.LightningDataModule):
 
         else:
             test_data = pd.read_csv(self.test_path)  # 평가데이터 준비
-            test_inputs, test_targets = self.preprocessing(test_data, False)
-            self.test_dataset = Dataset(test_inputs, test_targets)
-
             predict_data = pd.read_csv(self.predict_path)  # 예측할 데이터 준비
+
+            test_inputs, test_targets = self.preprocessing(test_data, False)
             predict_inputs, predict_targets = self.preprocessing(predict_data, False)
-            self.predict_dataset = Dataset(predict_inputs, [])
+
+            self.test_dataset = Dataset(test_inputs, test_targets)
+            self.predict_dataset = Dataset(predict_inputs, predict_targets)
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
@@ -198,12 +199,13 @@ class Dataloader_Ver2(pl.LightningDataModule):
             self.val_dataset = Dataset(val_inputs, val_targets)  # 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
         else:
             test_data = pd.read_csv(self.test_path)  # 평가데이터 준비
-            test_inputs, test_targets = self.preprocessing(test_data, False)
-            self.test_dataset = Dataset(test_inputs, test_targets)
-
             predict_data = pd.read_csv(self.predict_path)  # 예측할 데이터 준비
+
+            test_inputs, test_targets = self.preprocessing(test_data, False)
             predict_inputs, predict_targets = self.preprocessing(predict_data, False)
-            self.predict_dataset = Dataset(predict_inputs, [])
+
+            self.test_dataset = Dataset(test_inputs, test_targets)
+            self.predict_dataset = Dataset(predict_inputs, predict_targets)
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
