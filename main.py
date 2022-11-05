@@ -2,12 +2,11 @@ import argparse
 
 import random
 import numpy as np
-import pandas as pd
 import torch
 
 from omegaconf import OmegaConf
 
-from Step import train, inference
+from Step import train, inference, sweep
 
 
 def init():
@@ -57,9 +56,9 @@ if __name__ == "__main__":
         else:
             train.continue_train(args, conf)
 
-    elif args.mode == "sweep" or args.mode == "s":
+    elif args.mode == "exp" or args.mode == "e":
         exp_count = int(input("실험할 횟수를 입력해주세요 "))
-        print("Sweep")
+        sweep.sweep(args, conf, exp_count)
 
     elif args.mode == "inference" or args.mode == "i":
         if args.saved_model is None:
@@ -74,5 +73,5 @@ if __name__ == "__main__":
         print("모드를 다시 설정해주세요 ")
         print("train        : t,\ttrain")
         print("continue     : c,\tcontinue")
-        print("sweep        : s,\tsweep")
+        print("sweep        : e,\texp")
         print("inference    : i,\tinference")
