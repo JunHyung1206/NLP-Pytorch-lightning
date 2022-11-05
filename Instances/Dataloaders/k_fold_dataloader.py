@@ -1,6 +1,6 @@
 from Instances.Dataloaders.dataset import Dataset
 from tqdm.auto import tqdm
-from sklearn.model_selection import KFold, StratifiedShuffleSplit
+from sklearn.model_selection import KFold
 
 import pandas as pd
 import transformers
@@ -8,7 +8,7 @@ import torch
 import pytorch_lightning as pl
 import Utils.utils as utils
 
-# train, dev, test, predict 따로 있는 버전
+
 class KfoldDataloader(pl.LightningDataModule):
     def __init__(self, conf, k):
         super().__init__()
