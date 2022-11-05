@@ -1,4 +1,4 @@
-from Instances.Dataloaders import data_set as ds
+from Instances.Dataloaders.dataset import Dataset
 from tqdm.auto import tqdm
 
 import pandas as pd
@@ -6,8 +6,6 @@ import transformers
 import torch
 import torchmetrics
 import pytorch_lightning as pl
-
-
 
 class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따로 있는 버전
     def __init__(self, conf):
@@ -26,7 +24,8 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
         self.test_dataset = None
         self.predict_dataset = None
 
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, max_length=160)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer.model_max_length = 128
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
@@ -67,17 +66,17 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
             val_inputs, val_targets = self.preprocessing(val_data)
 
             # train 데이터만 shuffle을 적용해줍니다, 필요하다면 val, test 데이터에도 shuffle을 적용할 수 있습니다
-            self.train_dataset = ds.Dataset(train_inputs, train_targets)
-            self.val_dataset = ds.Dataset(val_inputs, val_targets)
+            self.train_dataset = Dataset(train_inputs, train_targets)
+            self.val_dataset = Dataset(val_inputs, val_targets)
         else:
             # 평가데이터 준비
             test_data = pd.read_csv(self.test_path)
             test_inputs, test_targets = self.preprocessing(test_data)
-            self.test_dataset = ds.Dataset(test_inputs, test_targets)
+            self.test_dataset = Dataset(test_inputs, test_targets)
 
             predict_data = pd.read_csv(self.predict_path)
             predict_inputs, predict_targets = self.preprocessing(predict_data)
-            self.predict_dataset = ds.Dataset(predict_inputs, [])
+            self.predict_dataset = Dataset(predict_inputs, [])
 
     def train_dataloader(self):
         return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
@@ -91,7 +90,10 @@ class Dataloader_Ver1(pl.LightningDataModule):  # train, dev, test, predict 따�
     def predict_dataloader(self):
         return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size)
     
-class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 버전 (train/value비율 설정)
+    
+    
+    
+class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 버전 (train/value비율 설정) # 층화 추출 이용
     def __init__(self, conf):
         super().__init__()
         self.model_name = conf.model.model_name
@@ -107,7 +109,9 @@ class Dataloader_Ver2(pl.LightningDataModule):  # train+dev, test, predict인 �
         self.test_dataset = None
         self.predict_dataset = None
 
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, max_length=160)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+        self.tokenizer.model_max_length = 128
+        
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
