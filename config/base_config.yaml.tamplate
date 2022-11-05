@@ -17,7 +17,7 @@ train:
   batch_size: 32
   learning_rate: 1e-5
   loss: rmse
-  use_frozen: False
+  use_freeze: False
   
 utils:
   seed: 42
