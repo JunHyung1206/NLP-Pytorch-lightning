@@ -34,19 +34,26 @@ def init():
     return args, conf
 
 
+# TODO
+# 최대한 단일 모델로 적정 하이퍼 파라미터를 얻은 뒤 사용
+# 데이터를 자를 때 유동적으로도 자를 수 있으므로 고려
+# 개인적으로 레이 튠 한번 사용해보고 싶음
+
 if __name__ == "__main__":
 
     args, conf = init()
 
     if args.mode == "train" or args.mode == "t":
         if conf.k_fold.use_k_fold:  # num_folds 변수 확인
-            print("K-Fold Train")
+            train.k_fold_train(args, conf)
         else:
             train.train(args, conf)
 
     elif args.mode == "continue" or args.mode == "c":
         if args.saved_model is None:
             print("경로를 입력해주세요")
+        elif conf.k_fold.use_k_fold:
+            print("K-Fold 추가 학습 불가능")
         else:
             train.continue_train(args, conf)
 
@@ -59,7 +66,7 @@ if __name__ == "__main__":
             print("경로를 입력해주세요")
         else:
             if conf.k_fold.use_k_fold:  # num_folds 변수 확인
-                print("K-Fold Instance")
+                inference.k_fold_inference(args, conf)
             else:
                 inference.inference(args, conf)
 

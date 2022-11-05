@@ -23,7 +23,31 @@ def train(args, conf):
 
 
 def k_fold_train(args, conf):
-    pass
+    project_name = conf.wandb.project
+    results = []
+    num_folds = conf.k_fold.num_folds
+    for k in range(num_folds):
+        k_dataloader, k_model = instance.kfold_new_instance(conf, k)
+        name_ = f"{k+1}th_fold"
+        wandb_logger = WandbLogger(project=project_name, name=name_)
+        save_path = f"{conf.path.save_path}{conf.model.model_name}/{args.config}_K_fold/"  # 모델 저장 디렉터리명에 wandb run name 추가
+        trainer = pl.Trainer(
+            accelerator="gpu",
+            devices=1,
+            max_epochs=conf.train.max_epoch,
+            log_every_n_steps=1,
+            logger=wandb_logger,
+        )
+        trainer.fit(model=k_model, datamodule=k_dataloader)
+        test_pearson = trainer.test(model=k_model, datamodule=k_dataloader)
+        wandb.finish()
+        test_pearson = test_pearson[0]["test_pearson"]
+
+        results.append(test_pearson)
+        trainer.save_checkpoint(f"{save_path}{k+1}-Fold.ckpt")
+
+    score = sum(results) / num_folds
+    print(score)
 
 
 def continue_train(args, conf):

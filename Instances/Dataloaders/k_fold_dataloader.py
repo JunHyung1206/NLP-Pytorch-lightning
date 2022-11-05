@@ -9,14 +9,14 @@ import pytorch_lightning as pl
 import Utils.utils as utils
 
 
-class KfoldDataloader(pl.LightningDataModule):
+class KFoldDataloader(pl.LightningDataModule):
     def __init__(self, conf, k):
         super().__init__()
         self.model_name = conf.model.model_name
         self.batch_size = conf.train.batch_size
         self.shuffle = conf.data.shuffle
         self.k = k
-        self.num_splits = conf.k_fold.num_split
+        self.num_split = conf.k_fold.num_split
         self.seed = conf.utils.seed  # 랜덤 시드
 
         self.train_path = conf.path.train_path
@@ -85,7 +85,7 @@ class KfoldDataloader(pl.LightningDataModule):
             train_indexes, val_indexes = all_splits[self.k]
             train_indexes, val_indexes = train_indexes.tolist(), val_indexes.tolist()
 
-            print("Number of splits: \n", self.num_splits)
+            print("Number of splits: \n", self.num_split)
             print("Before Swap Train data len: \n", len(train_indexes))
             print("Before Swap Valid data len: \n", len(val_indexes))
 
