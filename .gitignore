@@ -196,3 +196,4 @@ output.csv
 README.md
 
 save_models/
+*.yaml
