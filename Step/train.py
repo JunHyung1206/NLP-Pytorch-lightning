@@ -72,7 +72,26 @@ def k_fold_train(args, conf):
 
 
 def continue_train(args, conf):
-    trainer = pl.Trainer(gpus=1, max_epochs=conf.train.max_epoch, log_every_n_steps=1)
+    trainer = pl.Trainer(
+        gpus=1,
+        max_epochs=conf.train.max_epoch,
+        log_every_n_steps=1,
+        logger=wandb_logger,
+        callbacks=[
+            utils.early_stop(
+                monitor=utils.monitor_dict[conf.utils.early_stop_monitor]["monitor"],
+                mode=utils.monitor_dict[conf.utils.early_stop_monitor]["mode"],
+                patience=conf.utils.patience,
+            ),
+            utils.best_save(
+                save_path=save_path,
+                top_k=conf.utils.top_k,
+                monitor=utils.monitor_dict[conf.utils.best_save_monitor]["monitor"],
+                mode=utils.monitor_dict[conf.utils.best_save_monitor]["mode"],
+                filename="{epoch}-{val_pearson}",  # best 모델 저장시에 filename 설정
+            ),
+        ],
+    )
     dataloader, model, args, conf = instance.load_instance(args, conf)
     wandb_logger = WandbLogger(project=conf.wandb.project)
 
