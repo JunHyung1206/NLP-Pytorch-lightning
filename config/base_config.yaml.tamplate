@@ -31,4 +31,8 @@ k_fold:
   num_split: 5
   
 wandb:
-  project: nlp-08-sts
+  project: My Base Line
+
+
+# 개인적인 tip으론 yaml 파일명에 해당 설정을 통해 얻은 성능을 함께 기록해두면 나중에 앙상블할 모델을 찾거나 재현할 때 편합니다
+# 앞으로 모델 구조를 여기 안에 적어놔야겠다....
