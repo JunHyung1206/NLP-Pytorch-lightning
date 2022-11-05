@@ -195,5 +195,11 @@ model.pt
 output.csv
 README.md
 
-save_models/
+Savemodels/
+
 *.yaml
+
+requirements.txt
+
+
+*.csv
