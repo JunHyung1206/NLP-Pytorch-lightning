@@ -62,8 +62,8 @@ class Model(pl.LightningModule):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
         return optimizer
 
-    def freeze(self):  # 얼릴 파라미터 이름을 리스트 안에 지정
+    def freeze(self):
         for name, param in self.plm.named_parameters():
-            freeze_list = []
+            freeze_list = []  # 얼릴 파라미터 이름을 리스트 안에 지정
             if name in freeze_list:
                 param.requires_grad = False

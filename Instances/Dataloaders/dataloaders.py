@@ -36,7 +36,6 @@ class Dataloader_Ver1(pl.LightningDataModule):
             self.tokenizer = transformers.FunnelTokenizer.from_pretrained(self.model_name)
         else:
             self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
-        self.tokenizer.model_max_length = 128
 
         self.tokenizer.model_max_length = 128
 
@@ -114,7 +113,7 @@ class Dataloader_Ver1(pl.LightningDataModule):
         return self.new_token_count + self.tokenizer.vocab_size
 
 
-# train, dev, test, predict 따로 있는 버전
+# train, test, predict
 class Dataloader_Ver2(pl.LightningDataModule):
     def __init__(self, conf):
         super().__init__()
@@ -144,6 +143,7 @@ class Dataloader_Ver2(pl.LightningDataModule):
             self.tokenizer = transformers.FunnelTokenizer.from_pretrained(self.model_name)
         else:
             self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+
         self.tokenizer.model_max_length = 128
 
         tokens = ["<PERSON>"]
