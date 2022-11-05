@@ -50,7 +50,7 @@ if __name__ == "__main__":
         else:
             print("Continue")  # k-fold는 추가 학습 고려 X
 
-    elif args.mode == "exp" or args.mode == "e":
+    elif args.mode == "sweep" or args.mode == "s":
         exp_count = int(input("실험할 횟수를 입력해주세요 "))
         print("Sweep")
 
@@ -58,9 +58,14 @@ if __name__ == "__main__":
         if args.saved_model is None:
             print("경로를 입력해주세요")
         else:
-            inference.inference(args, conf)
+            if conf.k_fold.use_k_fold:  # num_folds 변수 확인
+                print("K-Fold Instance")
+            else:
+                inference.inference(args, conf)
+
     else:
         print("모드를 다시 설정해주세요 ")
-        print("train     : t,\ttrain")
-        print("exp       : e,\texp")
-        print("inference : i,\tinference")
+        print("train        : t,\ttrain")
+        print("continue     : c,\tcontinue")
+        print("sweep        : s,\tsweep")
+        print("inference    : i,\tinference")

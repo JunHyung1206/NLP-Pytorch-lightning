@@ -19,6 +19,10 @@ class Model(pl.LightningModule):
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
         self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
         self.loss_func = utils.loss_dict[conf.train.loss]
+        self.use_freeze = conf.train.use_freeze
+
+        if self.use_freeze:
+            self.freeze()
 
     def forward(self, x):
         x = self.plm(x)["logits"]
@@ -57,3 +61,9 @@ class Model(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
         return optimizer
+
+    def freeze(self):  # 얼릴 파라미터 이름을 리스트 안에 지정
+        for name, param in self.plm.named_parameters():
+            freeze_list = []
+            if name in freeze_list:
+                param.requires_grad = False
