@@ -2,7 +2,7 @@ path:
   train_path: ../data/train.csv
   test_path: ../data/dev.csv
   predict_path: ../data/test.csv
-  save_path: save_models/
+  save_path: SaveModels/
 
 data:
   shuffle: True
