@@ -12,7 +12,7 @@ from Step import train, inference, sweep
 def init():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", "-m", required=True)
-    parser.add_argument("--config", "-c", type=str, default="base_config")
+    parser.add_argument("--config", "-c", type=str, default="funnel_custom")
 
     parser.add_argument(
         "--saved_model",
@@ -34,9 +34,14 @@ def init():
 
 
 # TODO
-# 최대한 단일 모델로 적정 하이퍼 파라미터를 얻은 뒤 사용
-# 데이터를 자를 때 유동적으로도 자를 수 있으므로 고려
-# 개인적으로 레이 튠 한번 사용해보고 싶음
+# K폴드는 최대한 단일 모델로 적정 하이퍼 파라미터를 얻은 뒤 사용
+# 데이터 -> 모델 -> 하이퍼 파라미터 순으로 고려
+# 백본 모델을 선정할 때, 그리고 모델 구조를 변경할 땐 최대한 근거를 가지고 가설을 설정한 뒤 실험하기
+# 모델 구조를 변경할 때는 대조군을 꼭 갖기
+# 하이퍼 파라미터 조정은 우선 grid로 대략적인 범위를 파악한 뒤 그다음 그 범위 내에서 베이지안 기법 적용
+# 시퀀스를 자를 때 유동적으로도 자를 수 있으므로 고려 (버케팅)
+# 스케줄러 람다 함수 작성할 공간 마련해두기 (util 밑에다 둘까 아니면 모델 밑에다 둘까 고민된다)
+# 개인적으로 레이 한번 사용해보고 싶음
 
 if __name__ == "__main__":
 
