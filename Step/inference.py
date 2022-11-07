@@ -23,7 +23,6 @@ def inference(args, conf):
     output = pd.read_csv("../data/sample_submission.csv")
     output["target"] = predictions
     output.to_csv(f"output-{round(float(test_pearson), 4)}.csv", index=False)
-    # {round(float(score), 5)}
 
 
 def k_fold_inference(args, conf):

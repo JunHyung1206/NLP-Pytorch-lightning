@@ -11,7 +11,7 @@ def sweep(args, conf, exp_count):  # 메인에서 받아온 args와 실험을 �
     project_name = conf.wandb.project
 
     sweep_config = {
-        "method": "bayes",  # random: 임의의 값의 parameter 세트를 선택, #bayes : 베이지안 최적화
+        "method": "bayes",  # random: 임의의 값의 parameter 세트를 선택, #bayes : 베이지안 탐색법, #grid : 그리드 탐색법
         "parameters": {
             "lr": {
                 # parameter를 설정하는 기준을 선택합니다. uniform은 연속적으로 균등한 값들을 선택합니다.
@@ -22,7 +22,7 @@ def sweep(args, conf, exp_count):  # 메인에서 받아온 args와 실험을 �
         },
         "early_terminate": {  # 위의 링크에 있던 예시
             "type": "hyperband",
-            "max_iter": 30,  # 프로그램에 대해 최대 반복 횟수 지정, min과 max는 같이 사용 불가능한듯
+            "max_iter": 30,  # hyperband 공부 필요
             "s": 2,
         },
         "metric": {"name": "test_pearson", "goal": "maximize"},  # pearson 점수가 최대화가 되는 방향으로 학습을 진행합니다.
