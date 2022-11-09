@@ -2,6 +2,12 @@ from Instances.Dataloaders.dataloaders import Dataloader_Ver1, Dataloader_Ver2
 from Instances.Dataloaders.k_fold_dataloader import KFoldDataloader
 from Instances.Models.model import Model, CustomModel_DenseNet
 
+import streamlit as st
+import transformers
+import pytorch_lightning as pl
+import torch
+from Instances.Dataloaders.dataloaders import Dataloader_Streamlit
+
 
 def new_instance(conf):
     dataloader = Dataloader_Ver2(conf)
@@ -46,3 +52,23 @@ def kfold_load_instance(args, conf, k):
     k_model = k_model.load_from_checkpoint(args.saved_model + f"/{k+1}-Fold.ckpt")
 
     return k_dataloader, k_model
+
+
+@st.cache(allow_output_mutation=True)
+def load_model(args, conf):
+    tokenizer = transformers.AutoTokenizer.from_pretrained(conf.model.model_name)
+    _, model, _, _ = load_instance(args, conf)
+    return model, tokenizer
+
+
+def run_sts(sentence1, sentence2, conf, model):
+    trainer = pl.Trainer(gpus=1, max_epochs=conf.train.max_epoch, log_every_n_steps=1)
+    dataloader = Dataloader_Streamlit(conf, sentence1=sentence1, sentence2=sentence2)
+    predictions = trainer.predict(model=model, datamodule=dataloader)
+    print(predictions)
+    result = predictions[0].item()
+    if result > 5.0:
+        result = 5.0
+    elif result < 0.0:
+        result = 0.0
+    return result
