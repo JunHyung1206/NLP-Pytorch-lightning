@@ -12,7 +12,7 @@ from Step import train, inference, sweep
 def init():
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", "-m", required=True)
-    parser.add_argument("--config", "-c", type=str, default="funnel_custom")
+    parser.add_argument("--config", "-c", type=str, default="base_config")
 
     parser.add_argument(
         "--saved_model",
