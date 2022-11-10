@@ -30,7 +30,7 @@ def load_instance(args, conf):
 def kfold_new_instance(conf, k):
     # def __init__(self, conf, k):
     k_dataloader = KFoldDataloader(conf, k)
-    k_model = CustomModel_DenseNet(conf, k_dataloader.new_vocab_size())
+    k_model = Model(conf, k_dataloader.new_vocab_size())
     return k_dataloader, k_model
 
 
