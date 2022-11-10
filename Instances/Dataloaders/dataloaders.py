@@ -54,13 +54,13 @@ class Dataloader_Ver1(pl.LightningDataModule):
                 [item[text_column] for text_column in self.text_columns]
             )  # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
-            data.append(outputs["input_ids"])
+            data.append(outputs)
 
         if swap:  # swap 적용시 양방향 될 수 있도록
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
                 text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
-                data.append(outputs["input_ids"])
+                data.append(outputs)
 
         return data
 
@@ -164,13 +164,13 @@ class Dataloader_Ver2(pl.LightningDataModule):
                 [item[text_column] for text_column in self.text_columns]
             )  # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
-            data.append(outputs["input_ids"])
+            data.append(outputs)
 
         if swap:  # swap 적용시 양방향 될 수 있도록
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
                 text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
-                data.append(outputs["input_ids"])
+                data.append(outputs)
 
         return data
 

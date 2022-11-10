@@ -10,8 +10,8 @@ from Instances.Dataloaders.dataloaders import Dataloader_Streamlit
 
 
 def new_instance(conf):
-    dataloader = Dataloader_Ver2(conf)
-    model = Model(conf, dataloader.new_vocab_size())
+    dataloader = Dataloader_Ver1(conf)
+    model = CustomModel_DenseNet(conf, dataloader.new_vocab_size())
     return dataloader, model
 
 
@@ -36,7 +36,7 @@ def load_instance(args, conf):
 def kfold_new_instance(conf, k):
     # def __init__(self, conf, k):
     k_dataloader = KFoldDataloader(conf, k)
-    k_model = CustomModel_DenseNet(conf, k_dataloader.new_vocab_size())
+    k_model = Model(conf, k_dataloader.new_vocab_size())
     return k_dataloader, k_model
 
 
