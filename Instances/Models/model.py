@@ -18,18 +18,17 @@ class Model(pl.LightningModule):
         self.model_name = conf.model.model_name
         self.lr = conf.train.lr
 
-        # 사용할 모델을 호출합니다.
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
-        print(self.plm)
+        # print(self.plm)
 
         self.plm.config.type_vocab_size = 2
         single_emb = self.plm.roberta.embeddings.token_type_embeddings
         self.plm.roberta.embeddings.token_type_embeddings = torch.nn.Embedding(2, single_emb.embedding_dim)
         self.plm.roberta.embeddings.token_type_embeddings.weight = torch.nn.Parameter(single_emb.weight.repeat([2, 1]))
 
-        self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
+        self.plm.resize_token_embeddings(new_vocab_size)
 
-        print(self.plm)
+        # print(self.plm)
 
         self.loss_func = utils.loss_dict[conf.train.loss]
         self.use_freeze = conf.train.use_freeze
@@ -89,14 +88,19 @@ class CustomModel_DenseNet(pl.LightningModule):
         self.model_name = conf.model.model_name
         self.lr = conf.train.lr
 
-        # 사용할 모델을 호출합니다.
+        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size  # input vector
         self.plm = transformers.AutoModel.from_pretrained(pretrained_model_name_or_path=self.model_name)
         # self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).d_model  # input vector
-        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size  # input vector
-
+        print(self.plm)
         self.hidden_dim = 1024
 
-        self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
+        self.plm.config.type_vocab_size = 2
+        single_emb = self.plm.embeddings.token_type_embeddings
+        self.plm.embeddings.token_type_embeddings = torch.nn.Embedding(2, single_emb.embedding_dim)
+        self.plm.embeddings.token_type_embeddings.weight = torch.nn.Parameter(single_emb.weight.repeat([2, 1]))
+
+        self.plm.resize_token_embeddings(new_vocab_size)
+
         self.loss_func = utils.loss_dict[conf.train.loss]
         self.use_freeze = conf.train.use_freeze
 
