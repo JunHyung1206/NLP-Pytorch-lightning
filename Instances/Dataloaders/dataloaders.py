@@ -35,7 +35,7 @@ class Dataloader_Ver1(pl.LightningDataModule):
         elif self.model_name in utils.tokenizer_dict["funnel"]:
             self.tokenizer = transformers.FunnelTokenizer.from_pretrained(self.model_name)
         else:
-            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, use_fast=False)
 
         self.tokenizer.model_max_length = 128
 
@@ -143,7 +143,7 @@ class Dataloader_Ver2(pl.LightningDataModule):
         elif self.model_name in utils.tokenizer_dict["funnel"]:
             self.tokenizer = transformers.FunnelTokenizer.from_pretrained(self.model_name)
         else:
-            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, use_fast=False)
 
         self.tokenizer.model_max_length = 128
 
