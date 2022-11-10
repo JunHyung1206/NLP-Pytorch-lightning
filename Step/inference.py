@@ -19,7 +19,7 @@ def inference(args, conf):
         datamodule=dataloader,
     )
 
-    predictions = list(float(i) for i in torch.cat(predictions))  # 리스트화
+    predictions = list(float(i) for i in torch.cat(predictions))
     output = pd.read_csv("../data/sample_submission.csv")
     output["target"] = predictions
     output.to_csv(f"output-{round(float(test_pearson), 4)}.csv", index=False)
@@ -42,7 +42,7 @@ def k_fold_inference(args, conf):
             datamodule=k_dataloader,
         )
 
-        predictions = list(float(i) for i in torch.cat(predictions))  # 리스트화
+        predictions = list(float(i) for i in torch.cat(predictions))
         predictions_list.append(predictions)
 
     total_predictions = np.stack(predictions_list, axis=0)

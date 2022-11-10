@@ -17,7 +17,7 @@ class KFoldDataloader(pl.LightningDataModule):
         self.shuffle = conf.data.shuffle
         self.k = k
         self.num_split = conf.k_fold.num_split
-        self.seed = conf.utils.seed  # 랜덤 시드
+        self.seed = conf.utils.seed
 
         self.train_path = conf.path.train_path
         self.test_path = conf.path.test_path
@@ -57,7 +57,7 @@ class KFoldDataloader(pl.LightningDataModule):
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
             data.append(outputs)
 
-        if swap:  # swap 적용시 양방향 될 수 있도록
+        if swap:
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
                 text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
@@ -66,14 +66,14 @@ class KFoldDataloader(pl.LightningDataModule):
         return data
 
     def preprocessing(self, data, swap):
-        data = data.drop(columns=self.delete_columns)  # 안쓰는 컬럼을 삭제합니다.
+        data = data.drop(columns=self.delete_columns)
         try:
-            targets = data[self.target_columns].values.tolist()  # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
+            targets = data[self.target_columns].values.tolist()
             if swap:
-                targets += data[self.target_columns].values.tolist()  # 한번 더 사용
+                targets += data[self.target_columns].values.tolist()
         except:
             targets = []
-        inputs = self.tokenizing(data, swap)  # 텍스트 데이터를 전처리합니다.
+        inputs = self.tokenizing(data, swap)
         return inputs, targets
 
     def setup(self, stage="fit"):
@@ -101,8 +101,8 @@ class KFoldDataloader(pl.LightningDataModule):
             self.train_dataset = train_dataset
             self.val_dataset = valid_dataset
         else:
-            test_data = pd.read_csv(self.test_path)  # 평가데이터 준비
-            predict_data = pd.read_csv(self.predict_path)  # 예측할 데이터 준비
+            test_data = pd.read_csv(self.test_path)
+            predict_data = pd.read_csv(self.predict_path)
 
             test_inputs, test_targets = self.preprocessing(test_data, False)
             predict_inputs, predict_targets = self.preprocessing(predict_data, False)

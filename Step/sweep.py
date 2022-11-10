@@ -7,25 +7,24 @@ import wandb
 import Utils.utils as utils
 
 
-def sweep(args, conf, exp_count):  # 메인에서 받아온 args와 실험을 반복할 횟수를 받아옵니다
+def sweep(args, conf, exp_count):
     project_name = conf.wandb.project
 
     sweep_config = {
-        "method": "bayes",  # random: 임의의 값의 parameter 세트를 선택, #bayes : 베이지안 탐색법, #grid : 그리드 탐색법
+        "method": "bayes",
         "parameters": {
             "lr": {
-                # parameter를 설정하는 기준을 선택합니다. uniform은 연속적으로 균등한 값들을 선택합니다.
                 "distribution": "uniform",
-                "min": 1e-5,  # 최소값을 설정합니다.
-                "max": 3e-5,  # 최대값을 설정합니다.
+                "min": 1e-5,
+                "max": 3e-5,
             },
         },
-        "early_terminate": {  # 위의 링크에 있던 예시
+        "early_terminate": {
             "type": "hyperband",
             "max_iter": 30,  # hyperband 공부 필요
             "s": 2,
         },
-        "metric": {"name": "test_pearson", "goal": "maximize"},  # pearson 점수가 최대화가 되는 방향으로 학습을 진행합니다.
+        "metric": {"name": "test_pearson", "goal": "maximize"},
     }
 
     def sweep_train(config=None):
@@ -53,7 +52,7 @@ def sweep(args, conf, exp_count):  # 메인에서 받아온 args와 실험을 �
                     top_k=conf.utils.top_k,
                     monitor=utils.monitor_dict[conf.utils.best_save_monitor]["monitor"],
                     mode=utils.monitor_dict[conf.utils.best_save_monitor]["mode"],
-                    filename="{epoch}-{val_pearson}",  # best 모델 저장시에 filename 설정
+                    filename="{epoch}-{val_pearson}",
                 ),
             ],
         )
@@ -65,8 +64,8 @@ def sweep(args, conf, exp_count):  # 메인에서 받아온 args와 실험을 �
         trainer.save_checkpoint(f"{save_path}epoch={conf.train.max_epoch-1}-test_pearson={test_pearson}.ckpt")
 
     sweep_id = wandb.sweep(
-        sweep=sweep_config,  # config 딕셔너리를 추가합니다.
-        project=project_name,  # project의 이름을 추가합니다.
+        sweep=sweep_config,
+        project=project_name,
     )
 
-    wandb.agent(sweep_id=sweep_id, function=sweep_train, count=exp_count)  # 실험할 횟수 지정
+    wandb.agent(sweep_id=sweep_id, function=sweep_train, count=exp_count)

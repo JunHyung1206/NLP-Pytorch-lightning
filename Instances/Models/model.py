@@ -18,9 +18,8 @@ class Model(pl.LightningModule):
         self.model_name = conf.model.model_name
         self.lr = conf.train.lr
 
-        # 사용할 모델을 호출합니다.
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
-        self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
+        self.plm.resize_token_embeddings(new_vocab_size)
         self.loss_func = utils.loss_dict[conf.train.loss]
         self.use_freeze = conf.train.use_freeze
 
@@ -66,7 +65,7 @@ class Model(pl.LightningModule):
 
     def freeze(self):
         for name, param in self.plm.named_parameters():
-            freeze_list = []  # 얼릴 파라미터 이름을 리스트 안에 지정
+            freeze_list = []
             if name in freeze_list:
                 param.requires_grad = False
 
@@ -79,10 +78,9 @@ class CustomModel_DenseNet(pl.LightningModule):
         self.model_name = conf.model.model_name
         self.lr = conf.train.lr
 
-        # 사용할 모델을 호출합니다.
         self.plm = transformers.AutoModel.from_pretrained(pretrained_model_name_or_path=self.model_name)
-        # self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).d_model  # input vector
-        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size  # input vector
+        # self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).d_model
+        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size
 
         self.hidden_dim = 1024
 
@@ -98,8 +96,8 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def forward(self, input_ids, attention_mask, token_type_ids, labels):
         x = self.plm(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0]
-        x = x[:, 0, :]  # cls 토큰만 추출
-        y = self.Head(x)  # y: 1024
+        x = x[:, 0, :]
+        y = self.Head(x)
         x = torch.cat((x, y), dim=1)
         x = self.Head2(x)
         return x

@@ -31,7 +31,7 @@ def train(args, conf):
                 top_k=conf.utils.top_k,
                 monitor=utils.monitor_dict[conf.utils.best_save_monitor]["monitor"],
                 mode=utils.monitor_dict[conf.utils.best_save_monitor]["mode"],
-                filename="{epoch}-{val_pearson}",  # best 모델 저장시에 filename 설정
+                filename="{epoch}-{val_pearson}",
             ),
         ],
     )
@@ -51,7 +51,7 @@ def k_fold_train(args, conf):
         k_dataloader, k_model = instance.kfold_new_instance(conf, k)
         name_ = f"{k+1}th_fold"
         wandb_logger = WandbLogger(project=project_name, name=name_)
-        save_path = f"{conf.path.save_path}{conf.model.model_name}/{args.config}_K_fold/"  # 모델 저장 디렉터리명에 wandb run name 추가
+        save_path = f"{conf.path.save_path}{conf.model.model_name}/{args.config}_K_fold/"
         trainer = pl.Trainer(
             accelerator="gpu",
             devices=1,
@@ -88,7 +88,7 @@ def continue_train(args, conf):
                 top_k=conf.utils.top_k,
                 monitor=utils.monitor_dict[conf.utils.best_save_monitor]["monitor"],
                 mode=utils.monitor_dict[conf.utils.best_save_monitor]["mode"],
-                filename="{epoch}-{val_pearson}",  # best 모델 저장시에 filename 설정
+                filename="{epoch}-{val_pearson}",
             ),
         ],
     )
