@@ -37,7 +37,7 @@ class KFoldDataloader(pl.LightningDataModule):
         elif self.model_name in utils.tokenizer_dict["funnel"]:
             self.tokenizer = transformers.FunnelTokenizer.from_pretrained(self.model_name)
         else:
-            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+            self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, use_fast=False)
 
         self.tokenizer.model_max_length = 128
 
@@ -51,16 +51,26 @@ class KFoldDataloader(pl.LightningDataModule):
 
     def tokenizing(self, dataframe, swap):
         data = []
-        print("Tokenizer info: \n", self.tokenizer)
         for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-            text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns])
+            text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns])
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+            sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
+            outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
+            for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                outputs["token_type_ids"][i] = 1
+
             data.append(outputs)
 
         if swap:
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-                text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
+                text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+                sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
+                outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
+                for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                    outputs["token_type_ids"][i] = 1
                 data.append(outputs)
 
         return data

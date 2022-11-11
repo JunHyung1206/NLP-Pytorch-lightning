@@ -19,20 +19,30 @@ class Model(pl.LightningModule):
         self.lr = conf.train.lr
 
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=self.model_name, num_labels=1)
+        # print(self.plm)
+
+        self.plm.config.type_vocab_size = 2
+        single_emb = self.plm.roberta.embeddings.token_type_embeddings
+        self.plm.roberta.embeddings.token_type_embeddings = torch.nn.Embedding(2, single_emb.embedding_dim)
+        self.plm.roberta.embeddings.token_type_embeddings.weight = torch.nn.Parameter(single_emb.weight.repeat([2, 1]))
+
         self.plm.resize_token_embeddings(new_vocab_size)
+
+        # print(self.plm)
+
         self.loss_func = utils.loss_dict[conf.train.loss]
         self.use_freeze = conf.train.use_freeze
 
         if self.use_freeze:
             self.freeze()
 
-    def forward(self, input_ids, attention_mask, token_type_ids, labels):
-        x = self.plm(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids, labels=labels)["logits"]
+    def forward(self, input_ids, attention_mask, token_type_ids):
+        x = self.plm(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)["logits"]
         return x
 
     def training_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("train_loss", loss)
 
@@ -40,7 +50,7 @@ class Model(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("val_loss", loss)
         self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
@@ -49,13 +59,13 @@ class Model(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
 
     def predict_step(self, batch, batch_idx):
-        input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        input_ids, attention_mask, token_type_ids = batch
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         return logits.squeeze()
 
@@ -78,13 +88,19 @@ class CustomModel_DenseNet(pl.LightningModule):
         self.model_name = conf.model.model_name
         self.lr = conf.train.lr
 
+        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size  # input vector
         self.plm = transformers.AutoModel.from_pretrained(pretrained_model_name_or_path=self.model_name)
-        # self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).d_model
-        self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).hidden_size
-
+        # self.input_dim = transformers.AutoConfig.from_pretrained(self.model_name).d_model  # input vector
+        print(self.plm)
         self.hidden_dim = 1024
 
-        self.plm.resize_token_embeddings(new_vocab_size)  # 임베딩 차원 재조정
+        self.plm.config.type_vocab_size = 2
+        single_emb = self.plm.embeddings.token_type_embeddings
+        self.plm.embeddings.token_type_embeddings = torch.nn.Embedding(2, single_emb.embedding_dim)
+        self.plm.embeddings.token_type_embeddings.weight = torch.nn.Parameter(single_emb.weight.repeat([2, 1]))
+
+        self.plm.resize_token_embeddings(new_vocab_size)
+
         self.loss_func = utils.loss_dict[conf.train.loss]
         self.use_freeze = conf.train.use_freeze
 
@@ -94,7 +110,7 @@ class CustomModel_DenseNet(pl.LightningModule):
         if self.use_freeze:
             self.freeze()
 
-    def forward(self, input_ids, attention_mask, token_type_ids, labels):
+    def forward(self, input_ids, attention_mask, token_type_ids):
         x = self.plm(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0]
         x = x[:, 0, :]
         y = self.Head(x)
@@ -104,7 +120,7 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("train_loss", loss)
 
@@ -112,7 +128,7 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("val_loss", loss)
         self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
@@ -121,13 +137,13 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
 
     def predict_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         return logits.squeeze()
 

@@ -4,8 +4,8 @@ from Instances.Models.model import Model, CustomModel_DenseNet
 
 
 def new_instance(conf):
-    dataloader = Dataloader_Ver1(conf)
-    model = CustomModel_DenseNet(conf, dataloader.new_vocab_size())
+    dataloader = Dataloader_Ver2(conf)
+    model = Model(conf, dataloader.new_vocab_size())
     return dataloader, model
 
 

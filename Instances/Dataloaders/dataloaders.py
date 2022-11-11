@@ -50,14 +50,25 @@ class Dataloader_Ver1(pl.LightningDataModule):
     def tokenizing(self, dataframe, swap):
         data = []
         for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-            text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns])
+            text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns])
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+            sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
+            outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
+            for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                outputs["token_type_ids"][i] = 1
+
             data.append(outputs)
 
         if swap:
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-                text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
+                text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+                sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
+                outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
+                for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                    outputs["token_type_ids"][i] = 1
                 data.append(outputs)
 
         return data
@@ -157,14 +168,25 @@ class Dataloader_Ver2(pl.LightningDataModule):
     def tokenizing(self, dataframe, swap):
         data = []
         for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-            text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns])
+            text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns])
             outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+            sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]
+            outputs["token_type_ids"] = [0] * len(outputs["input_ids"])
+            for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                outputs["token_type_ids"][i] = 1
+
             data.append(outputs)
 
         if swap:
             for idx, item in tqdm(dataframe.iterrows(), desc="tokenizing", total=len(dataframe)):
-                text = self.tokenizer.special_tokens_map["sep_token"].join([item[text_column] for text_column in self.text_columns[::-1]])
+                text = self.tokenizer.sep_token.join([item[text_column] for text_column in self.text_columns[::-1]])
                 outputs = self.tokenizer(text, add_special_tokens=True, padding="max_length", truncation=True)
+
+                sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]
+                outputs["token_type_ids"] = [0] * len(outputs["input_ids"])
+                for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                    outputs["token_type_ids"][i] = 1
                 data.append(outputs)
 
         return data
