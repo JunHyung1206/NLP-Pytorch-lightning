@@ -57,7 +57,7 @@ class KFoldDataloader(pl.LightningDataModule):
 
             sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
             outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
-            for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+            for i in range(sep_tokens_idx[0] + 1, sep_tokens_idx[1] + 1):
                 outputs["token_type_ids"][i] = 1
 
             data.append(outputs)
@@ -68,7 +68,7 @@ class KFoldDataloader(pl.LightningDataModule):
 
                 sep_tokens_idx = [idx for idx, value in enumerate(outputs["input_ids"]) if value == self.tokenizer.sep_token_id]  # sep 토큰의 위치
                 outputs["token_type_ids"] = [0] * len(outputs["input_ids"])  # [0,0, ... ,0]으로 초기화
-                for i in range(sep_tokens_idx[0], sep_tokens_idx[1] + 1):
+                for i in range(sep_tokens_idx[0] + 1, sep_tokens_idx[1] + 1):
                     outputs["token_type_ids"][i] = 1
                 data.append(outputs)
 
