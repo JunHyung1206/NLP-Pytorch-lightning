@@ -110,7 +110,7 @@ class CustomModel_DenseNet(pl.LightningModule):
         if self.use_freeze:
             self.freeze()
 
-    def forward(self, input_ids, attention_mask, token_type_ids, labels):
+    def forward(self, input_ids, attention_mask, token_type_ids):
         x = self.plm(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0]
         x = x[:, 0, :]  # cls 토큰만 추출
         y = self.Head(x)  # y: 1024
@@ -120,7 +120,7 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("train_loss", loss)
 
@@ -128,7 +128,7 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
         loss = self.loss_func(logits, labels.float())
         self.log("val_loss", loss)
         self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
@@ -137,13 +137,13 @@ class CustomModel_DenseNet(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), labels.squeeze()))
 
     def predict_step(self, batch, batch_idx):
         input_ids, attention_mask, token_type_ids, labels = batch
-        logits = self(input_ids, attention_mask, token_type_ids, labels)
+        logits = self(input_ids, attention_mask, token_type_ids)
 
         return logits.squeeze()
 
